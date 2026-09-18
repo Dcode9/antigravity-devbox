@@ -1,0 +1,13 @@
+{
+  "name": "Antigravity DevBox",
+  "image": "mcr.microsoft.com/devcontainers/universal:latest",
+  "postCreateCommand": "curl -fsSL https://antigravity.google/cli/install.sh | bash",
+  "remoteUser": "codespace",
+  "customizations": {
+    "vscode": {
+      "settings": {
+        "terminal.integrated.defaultProfile.linux": "bash"
+      }
+    }
+  }
+}
