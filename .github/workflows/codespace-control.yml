@@ -1,0 +1,78 @@
+name: Codespace Control
+
+on:
+  workflow_dispatch:
+    inputs:
+      action:
+        description: "Action to perform"
+        required: true
+        type: choice
+        options:
+          - start
+          - stop
+          - status
+
+jobs:
+  control:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Control Codespace
+        env:
+          GH_TOKEN: ${{ secrets.CODESPACE_TOKEN }}
+          ACTION: ${{ inputs.action }}
+        run: |
+          set -e
+          if [ -z "$GH_TOKEN" ]; then
+            echo "❌ Missing CODESPACE_TOKEN secret. Create a classic PAT with 'codespace' scope and add it as a repository secret named CODESPACE_TOKEN."
+            exit 1
+          fi
+
+          echo "Looking for codespaces for Dcode9/antigravity-devbox..."
+          LIST=$(curl -s -H "Authorization: Bearer $GH_TOKEN" -H "Accept: application/vnd.github+json" \
+            "https://api.github.com/user/codespaces")
+
+          NAME=$(echo "$LIST" | jq -r '.codespaces[] | select(.repository.full_name=="Dcode9/antigravity-devbox") | .name' | head -n1)
+
+          if [ -z "$NAME" ] || [ "$NAME" = "null" ]; then
+            echo "No existing codespace found for this repo."
+            if [ "$ACTION" = "start" ]; then
+              echo "Creating a new codespace..."
+              curl -s -X POST -H "Authorization: Bearer $GH_TOKEN" -H "Accept: application/vnd.github+json" \
+                -H "Content-Type: application/json" \
+                -d '{"repository_id":1375646022}' \
+                "https://api.github.com/user/codespaces" | jq .
+              exit 0
+            else
+              echo "Nothing to $ACTION."
+              exit 0
+            fi
+          fi
+
+          echo "Found codespace: $NAME"
+          STATE=$(echo "$LIST" | jq -r --arg n "$NAME" '.codespaces[] | select(.name==$n) | .state')
+          echo "Current state: $STATE"
+
+          case "$ACTION" in
+            status)
+              echo "Status: $STATE"
+              echo "$LIST" | jq --arg n "$NAME" '.codespaces[] | select(.name==$n)'
+              ;;
+            start)
+              if [ "$STATE" = "Available" ] || [ "$STATE" = "Running" ]; then
+                echo "Already running."
+              else
+                echo "Starting..."
+                curl -s -X POST -H "Authorization: Bearer $GH_TOKEN" -H "Accept: application/vnd.github+json" \
+                  "https://api.github.com/user/codespaces/$NAME/start" | jq .
+              fi
+              ;;
+            stop)
+              if [ "$STATE" = "Shutdown" ] || [ "$STATE" = "Stopped" ]; then
+                echo "Already stopped."
+              else
+                echo "Stopping..."
+                curl -s -X POST -H "Authorization: Bearer $GH_TOKEN" -H "Accept: application/vnd.github+json" \
+                  "https://api.github.com/user/codespaces/$NAME/stop" | jq .
+              fi
+              ;;
+          esac
