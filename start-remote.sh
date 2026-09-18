@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 set -e
 
-# Ensure agy binary is in PATH if not already loaded
 export PATH="$HOME/.local/bin:$HOME/.antigravity/bin:$PATH"
 
 if ! command -v agy &> /dev/null; then
@@ -11,7 +10,8 @@ if ! command -v agy &> /dev/null; then
 fi
 
 echo "[*] Checking Antigravity version..."
-agy --version
+agy --version || true
 
-echo "[*] Starting Antigravity Remote Control daemon..."
-agy remote-control start --name "codespace-cloudbox"
+echo "[*] Starting Antigravity Remote Control daemon in background..."
+nohup agy remote-control start --name "codespace-cloudbox" > /tmp/agy-remote.log 2>&1 &
+echo "[*] Daemon started (PID $!). Log: /tmp/agy-remote.log"
