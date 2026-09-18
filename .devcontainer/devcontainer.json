@@ -3,6 +3,7 @@
   "image": "mcr.microsoft.com/devcontainers/universal:latest",
   "postCreateCommand": "curl -fsSL https://antigravity.google/cli/install.sh | bash && chmod +x start-remote.sh",
   "postStartCommand": "./start-remote.sh",
+  "postAttachCommand": "./start-remote.sh",
   "remoteUser": "codespace",
   "customizations": {
     "vscode": {
