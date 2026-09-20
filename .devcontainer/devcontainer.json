@@ -1,9 +1,9 @@
 {
   "name": "Antigravity DevBox",
   "image": "mcr.microsoft.com/devcontainers/universal:latest",
-  "postCreateCommand": "curl -fsSL https://antigravity.google/cli/install.sh | bash && chmod +x start-remote.sh",
-  "postStartCommand": "./start-remote.sh",
-  "postAttachCommand": "./start-remote.sh",
+  "postCreateCommand": "curl -fsSL https://antigravity.google/cli/install.sh | bash && chmod +x start-remote.sh && (command -v tmux >/dev/null || (sudo apt-get update -qq && sudo apt-get install -y -qq tmux)) || true",
+  "postStartCommand": "bash ./start-remote.sh",
+  "postAttachCommand": "bash ./start-remote.sh",
   "remoteUser": "codespace",
   "customizations": {
     "vscode": {
