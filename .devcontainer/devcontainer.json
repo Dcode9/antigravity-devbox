@@ -1,14 +1,14 @@
 {
   "name": "Antigravity DevBox",
   "image": "mcr.microsoft.com/devcontainers/universal:latest",
-  "postCreateCommand": "curl -fsSL https://antigravity.google/cli/install.sh | bash && chmod +x start-remote.sh preview-server.py && (command -v tmux >/dev/null || (sudo apt-get update -qq && sudo apt-get install -y -qq tmux)) || true",
+  "postCreateCommand": "curl -fsSL https://antigravity.google/cli/install.sh | bash && chmod +x start-remote.sh && (test -f preview-server.py && chmod +x preview-server.py || true) || true",
   "postStartCommand": "bash ./start-remote.sh",
   "postAttachCommand": "bash ./start-remote.sh",
   "forwardPorts": [7681],
   "portsAttributes": {
     "7681": {
       "label": "Antigravity Live Preview",
-      "onAutoForward": "openPreview"
+      "onAutoForward": "notify"
     }
   },
   "remoteUser": "codespace",
